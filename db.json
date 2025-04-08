@@ -98,6 +98,28 @@
       "userId": "c22c",
       "createdAt": "2025-04-08T03:03:14.166Z",
       "updatedAt": "2025-04-08T03:03:14.166Z"
+    },
+    {
+      "id": "571f",
+      "type": "expense",
+      "category": "Groceries",
+      "amount": 120,
+      "date": "2025-04-08",
+      "description": "asd",
+      "userId": "1",
+      "createdAt": "2025-04-08T04:13:21.015Z",
+      "updatedAt": "2025-04-08T04:13:21.015Z"
+    },
+    {
+      "id": "c221",
+      "type": "expense",
+      "category": "asdasd",
+      "amount": 120,
+      "date": "2025-04-08",
+      "description": "asd",
+      "userId": "google-1744085879770",
+      "createdAt": "2025-04-08T04:18:30.583Z",
+      "updatedAt": "2025-04-08T04:18:30.583Z"
     }
   ],
   "budgets": [
@@ -137,6 +159,24 @@
       "userId": "c22c",
       "createdAt": "2025-04-08T03:02:55.540Z",
       "updatedAt": "2025-04-08T03:02:55.540Z"
+    },
+    {
+      "id": "978e",
+      "category": "Food & Dining",
+      "limit": 500,
+      "period": "monthly",
+      "userId": "google-1744085879770",
+      "createdAt": "2025-04-08T04:18:10.703Z",
+      "updatedAt": "2025-04-08T04:18:10.703Z"
+    },
+    {
+      "id": "ffbc",
+      "category": "",
+      "limit": 50,
+      "period": "monthly",
+      "userId": "google-1744085879770",
+      "createdAt": "2025-04-08T04:26:30.156Z",
+      "updatedAt": "2025-04-08T04:26:30.156Z"
     }
   ]
 }

@@ -9,7 +9,6 @@ const Register: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   
-  // Form state
   const [formData, setFormData] = useState<RegisterData>({
     email: '',
     password: '',
@@ -21,24 +20,19 @@ const Register: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   
-  // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Reset errors
     setError('');
     
-    // Validate form
     let isValid = true;
     const newErrors: Partial<Record<keyof RegisterData | string, string>> = {};
     
-    // Required fields
     if (!formData.email) {
       newErrors.email = 'Email is required';
       isValid = false;
@@ -64,26 +58,17 @@ const Register: React.FC = () => {
       isValid = false;
     }
     
-    // Password match
     if (formData.password && formData.confirmPassword && 
         formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
       isValid = false;
     }
     
-    // Password minimum length
-    if (formData.password && formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
-      isValid = false;
-    }
-    
-    // If validation fails, update errors and return
     if (!isValid) {
       setError(Object.values(newErrors).join('\n'));
       return;
     }
     
-    // If all validations pass, submit the form
     setIsLoading(true);
     
     try {
@@ -94,10 +79,8 @@ const Register: React.FC = () => {
         lastName: formData.lastName
       }) as any);
       
-      // Redirect to dashboard on success
       navigate('/');
     } catch (error) {
-      // Handle errors
       if (error instanceof Error) {
         setError(error.message);
       } else {

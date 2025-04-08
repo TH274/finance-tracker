@@ -41,11 +41,10 @@ export const loginUser = async (email: string, password: string) => {
 export const loginWithGoogle = async (credential: string) => {
   try {
     if (isJsonServer) {
-      // For JSON server, we would need to create a mock response
-      // In a real app, this would verify the Google token with your backend
+
       const mockUser = {
         id: `google-${Date.now()}`,
-        email: 'google-user@example.com', // In a real app, you would get this from decoded token
+        email: 'google-user@example.com', // ( hien tai chua co time lay token )
         firstName: 'Google',
         lastName: 'User',
         createdAt: new Date().toISOString(),

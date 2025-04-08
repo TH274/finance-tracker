@@ -8,6 +8,7 @@ import useBudgetWarning from '../../hooks/useBudgetWarning';
 import { ArrowUpIcon, ArrowDownIcon, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { fetchUserProfile } from '../../store/slices/authSlice';
+import ReportExport from '../../components/reports/ReportExport';
 
 // Lazy load
 const ExpenseChart = lazy(() => import('../../components/charts/ExpenseChart'));
@@ -26,30 +27,30 @@ const Dashboard: React.FC = () => {
   // Authentication check
   useEffect(() => {
     let isMounted = true;
-    
+
     if (!isAuthenticated && isMounted) {
       console.log('Not authenticated, redirecting to login');
       navigate('/login');
     }
-    
+
     return () => {
       isMounted = false;
     };
   }, [isAuthenticated, navigate]);
 
-  // Fetch user profile if authenticated but no user data
+  // Fetch user profile
   useEffect(() => {
     let isMounted = true;
-    
+
     const fetchProfile = async () => {
       if (isAuthenticated && !user && isMounted) {
         console.log('Authenticated but no user data, fetching profile');
         await dispatch(fetchUserProfile() as any);
       }
     };
-    
+
     fetchProfile();
-    
+
     return () => {
       isMounted = false;
     };
@@ -88,7 +89,7 @@ const Dashboard: React.FC = () => {
       }
     };
     fetchData();
-    
+
     // Cleanup function
     return () => {
       isMounted = false;
@@ -98,8 +99,8 @@ const Dashboard: React.FC = () => {
   // Log data on mount and when data changes significantly
   useEffect(() => {
     // Only log if we haven't logged before or if the data has actually changed in a meaningful way
-    if (!dataLogged.current || 
-        (transactions.length > 0 && budgets.length > 0)) {
+    if (!dataLogged.current ||
+      (transactions.length > 0 && budgets.length > 0)) {
       console.log('Dashboard - Transactions:', transactions);
       console.log('Dashboard - Budgets:', budgets);
       dataLogged.current = true;
@@ -132,23 +133,23 @@ const Dashboard: React.FC = () => {
         date.getFullYear() === currentYear
       );
     });
-    
+
     // Calculate total income
     const totalIncome = currentMonthTransactions
       .filter(transaction => transaction.type === 'income')
       .reduce((sum, transaction) => sum + transaction.amount, 0);
-    
+
     // Calculate total expenses
     const totalExpenses = currentMonthTransactions
       .filter(transaction => transaction.type === 'expense')
       .reduce((sum, transaction) => sum + transaction.amount, 0);
-    
+
     // Calculate savings
     const savings = totalIncome - totalExpenses;
-    
+
     // Calculate savings rate (as percentage of income)
     const savingsRate = totalIncome > 0 ? (savings / totalIncome) * 100 : 0;
-    
+
     return {
       totalIncome,
       totalExpenses,
@@ -188,11 +189,6 @@ const Dashboard: React.FC = () => {
     },
   };
 
-  const chartFallback = (
-    <div className="w-full h-64 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
-      <div className="animate-pulse text-primary-600 dark:text-primary-400">Loading chart...</div>
-    </div>
-  );
 
   if (isLoading) {
     return (
@@ -202,7 +198,6 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  // Convert budgetWarnings to format expected by BudgetChart
   const budgetChartData = budgetWarnings.map(warning => ({
     category: warning.category,
     limit: warning.limit,
@@ -219,7 +214,7 @@ const Dashboard: React.FC = () => {
       animate="visible"
       variants={containerVariants}
     >
-      <motion.h1 
+      <motion.h1
         className="text-2xl font-bold mb-6"
         variants={itemVariants}
       >
@@ -227,7 +222,7 @@ const Dashboard: React.FC = () => {
       </motion.h1>
 
       {/* Summary cards */}
-      <motion.div 
+      <motion.div
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
         variants={itemVariants}
       >
@@ -241,7 +236,7 @@ const Dashboard: React.FC = () => {
             <span className="text-xs text-success-600 dark:text-success-400">+15% from last month</span>
           </div>
         </div>
-        
+
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
           <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">Monthly Expenses</h2>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">
@@ -252,14 +247,13 @@ const Dashboard: React.FC = () => {
             <span className="text-xs text-danger-600 dark:text-danger-400">+8% from last month</span>
           </div>
         </div>
-        
+
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
           <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">Monthly Savings</h2>
-          <p className={`text-2xl font-bold mt-1 ${
-            summary.savings >= 0
+          <p className={`text-2xl font-bold mt-1 ${summary.savings >= 0
               ? 'text-success-600 dark:text-success-400'
               : 'text-danger-600 dark:text-danger-400'
-          }`}>
+            }`}>
             {formatCurrency(summary.savings)}
           </p>
           <div className="flex items-center mt-2">
@@ -280,7 +274,7 @@ const Dashboard: React.FC = () => {
             )}
           </div>
         </div>
-        
+
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
           <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">Budget Alerts</h2>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">
@@ -312,7 +306,7 @@ const Dashboard: React.FC = () => {
           <h3 className="text-lg font-medium text-gray-800 dark:text-white mb-4">
             Expense Breakdown
           </h3>
-          <Suspense 
+          <Suspense
             fallback={
               <div className="h-64 flex justify-center items-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500"></div>
@@ -330,7 +324,7 @@ const Dashboard: React.FC = () => {
           <h3 className="text-lg font-medium text-gray-800 dark:text-white mb-4">
             Income vs Expenses (6 Months)
           </h3>
-          <Suspense 
+          <Suspense
             fallback={
               <div className="h-64 flex justify-center items-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500"></div>
@@ -350,7 +344,7 @@ const Dashboard: React.FC = () => {
         <h3 className="text-lg font-medium text-gray-800 dark:text-white mb-4">
           Budget Progress
         </h3>
-        <Suspense 
+        <Suspense
           fallback={
             <div className="h-64 flex justify-center items-center">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500"></div>
@@ -372,20 +366,19 @@ const Dashboard: React.FC = () => {
           </h3>
           <div className="space-y-3">
             {importantWarnings.map((warning) => (
-              <div 
+              <div
                 key={warning.category}
                 className="p-3 rounded-lg border border-gray-200 dark:border-gray-700"
               >
                 <div className="flex justify-between items-center mb-2">
                   <h4 className="font-medium text-gray-800 dark:text-white">{warning.category}</h4>
-                  <span 
-                    className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      warning.isOverBudget 
-                        ? 'bg-danger-100 text-danger-800 dark:bg-danger-900 dark:text-danger-300' 
+                  <span
+                    className={`px-2 py-1 text-xs font-medium rounded-full ${warning.isOverBudget
+                        ? 'bg-danger-100 text-danger-800 dark:bg-danger-900 dark:text-danger-300'
                         : warning.percentage >= 90
-                        ? 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-300'
-                        : 'bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-300'
-                    }`}
+                          ? 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-300'
+                          : 'bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-300'
+                      }`}
                   >
                     {warning.percentage.toFixed(0)}%
                   </span>
@@ -393,20 +386,19 @@ const Dashboard: React.FC = () => {
                 <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
                   <span>{formatCurrency(warning.spent)} of {formatCurrency(warning.limit)}</span>
                   <span>
-                    {warning.remaining >= 0 
-                      ? `${formatCurrency(warning.remaining)} left` 
+                    {warning.remaining >= 0
+                      ? `${formatCurrency(warning.remaining)} left`
                       : `${formatCurrency(Math.abs(warning.remaining))} over`}
                   </span>
                 </div>
                 <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full ${
-                      warning.isOverBudget 
-                        ? 'bg-danger-500' 
+                  <div
+                    className={`h-full ${warning.isOverBudget
+                        ? 'bg-danger-500'
                         : warning.percentage >= 90
-                        ? 'bg-warning-500'
-                        : 'bg-success-500'
-                    }`}
+                          ? 'bg-warning-500'
+                          : 'bg-success-500'
+                      }`}
                     style={{ width: `${Math.min(100, warning.percentage)}%` }}
                   ></div>
                 </div>
@@ -414,7 +406,16 @@ const Dashboard: React.FC = () => {
             ))}
           </div>
         </motion.div>
+
       )}
+
+      {/* Report Export */}
+      <motion.div
+        className="mt-6"
+        variants={itemVariants}
+      >
+        <ReportExport />
+      </motion.div>
     </motion.div>
   );
 };

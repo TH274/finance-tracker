@@ -3,10 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
 import { Edit, Trash2, Plus, Filter, Search } from 'lucide-react';
 import { RootState } from '../../store/store';
-import { 
-  fetchTransactions, 
-  createTransaction, 
-  updateTransaction, 
+import {
+  fetchTransactions,
+  createTransaction,
+  updateTransaction,
   deleteTransaction
 } from '../../store/slices/transactionsSlice';
 import { Transaction } from '../../utils/transactions';
@@ -15,26 +15,27 @@ import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { fetchUserProfile } from '../../store/slices/authSlice';
 import { transactionTypes } from '../../contains/transactionType';
+import { tableHeaders } from './tableHeader';
 
 const TransactionsPage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
   const { transactions, status } = useSelector((state: RootState) => state.transactions);
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [dateRange, setDateRange] = useState({
     startDate: '',
     endDate: '',
   });
-  
+
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
   const [currentTransaction, setCurrentTransaction] = useState<Partial<Transaction> | null>(null);
-  
+
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
@@ -46,7 +47,7 @@ const TransactionsPage: React.FC = () => {
       dispatch(fetchUserProfile() as any);
     }
   }, [isAuthenticated, user, dispatch]);
-  
+
   useEffect(() => {
     if (user?.id) {
       console.log('Fetching transactions for user:', user.id);
@@ -55,13 +56,13 @@ const TransactionsPage: React.FC = () => {
       console.log('Not fetching transactions - user ID not available');
     }
   }, [dispatch, user]);
-  
+
   const filteredTransactions = useMemo(() => {
     return transactions.filter((transaction: Transaction) => {
       if (typeFilter !== 'all' && transaction.type !== typeFilter) {
         return false;
       }
-      
+
       // Date range filter
       if (dateRange.startDate && new Date(transaction.date) < new Date(dateRange.startDate)) {
         return false;
@@ -69,7 +70,7 @@ const TransactionsPage: React.FC = () => {
       if (dateRange.endDate && new Date(transaction.date) > new Date(dateRange.endDate)) {
         return false;
       }
-      
+
       // Search filter
       if (debouncedSearchTerm) {
         const searchLower = debouncedSearchTerm.toLowerCase();
@@ -78,11 +79,11 @@ const TransactionsPage: React.FC = () => {
           transaction.category.toLowerCase().includes(searchLower)
         );
       }
-      
+
       return true;
     });
   }, [transactions, typeFilter, dateRange, debouncedSearchTerm]);
-  
+
   // Format currency
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -92,18 +93,18 @@ const TransactionsPage: React.FC = () => {
       maximumFractionDigits: 0,
     }).format(value);
   };
-  
+
   // Handle form submit for adding/editing transactions
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isAuthenticated) {
       console.error('User not authenticated');
       alert('Your session has expired. Please log in again.');
       navigate('/login');
       return;
     }
-    
+
     if (!user?.id) {
       console.error('User ID is missing. Attempting to reload user profile...');
       try {
@@ -117,14 +118,14 @@ const TransactionsPage: React.FC = () => {
         return;
       }
     }
-    
+
     if (!currentTransaction) {
       console.error('Current transaction data is missing');
       return;
     }
-    
+
     console.log('Submitting transaction form:', { mode: formMode, transaction: currentTransaction, userId: user?.id });
-    
+
     try {
       if (formMode === 'add') {
         const transactionData = {
@@ -134,7 +135,7 @@ const TransactionsPage: React.FC = () => {
         console.log('Dispatching createTransaction with:', transactionData);
         const resultAction = await dispatch(createTransaction(transactionData as any) as any);
         console.log('createTransaction result:', resultAction);
-        
+
         if (createTransaction.rejected.match(resultAction)) {
           console.error('Transaction creation failed:', resultAction.payload);
           // Display error to user
@@ -146,22 +147,20 @@ const TransactionsPage: React.FC = () => {
           console.error('Cannot edit: transaction ID is missing');
           return;
         }
-        
+
         console.log('Dispatching updateTransaction with:', { id: currentTransaction.id, transaction: currentTransaction });
         const resultAction = await dispatch(updateTransaction({
           id: currentTransaction.id,
           transaction: currentTransaction,
         } as any) as any);
         console.log('updateTransaction result:', resultAction);
-        
+
         if (updateTransaction.rejected.match(resultAction)) {
-          console.error('Transaction update failed:', resultAction.payload);
-          // Display error to user
           alert(`Failed to update transaction: ${resultAction.payload}`);
           return;
         }
       }
-      
+
       // Reset form and state
       setShowForm(false);
       setCurrentTransaction(null);
@@ -171,7 +170,7 @@ const TransactionsPage: React.FC = () => {
       alert(`Error: ${(error as Error).message}`);
     }
   };
-  
+
   // Handle transaction deletion
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this transaction?')) {
@@ -182,14 +181,14 @@ const TransactionsPage: React.FC = () => {
       }
     }
   };
-  
+
   // Open edit form
   const handleEdit = (transaction: Transaction) => {
     setCurrentTransaction(transaction);
     setFormMode('edit');
     setShowForm(true);
   };
-  
+
   // Open add form
   const handleAdd = () => {
     setCurrentTransaction({
@@ -202,7 +201,7 @@ const TransactionsPage: React.FC = () => {
     setFormMode('add');
     setShowForm(true);
   };
-  
+
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -225,7 +224,7 @@ const TransactionsPage: React.FC = () => {
       },
     },
   };
-  
+
   return (
     <motion.div
       className="p-6"
@@ -233,7 +232,7 @@ const TransactionsPage: React.FC = () => {
       animate="visible"
       variants={containerVariants}
     >
-      <motion.div 
+      <motion.div
         className="flex justify-between items-center mb-6"
         variants={itemVariants}
       >
@@ -246,9 +245,9 @@ const TransactionsPage: React.FC = () => {
           Add Transaction
         </button>
       </motion.div>
-      
+
       {/* Filters and Search */}
-      <motion.div 
+      <motion.div
         className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mb-6 border border-gray-200 dark:border-gray-700"
         variants={itemVariants}
       >
@@ -267,25 +266,25 @@ const TransactionsPage: React.FC = () => {
               ))}
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date Range</label>
             <div className="flex gap-2">
               <input
                 type="date"
                 value={dateRange.startDate}
-                onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
+                onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
               />
               <input
                 type="date"
                 value={dateRange.endDate}
-                onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+                onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
             <div className="relative">
@@ -301,7 +300,7 @@ const TransactionsPage: React.FC = () => {
           </div>
         </div>
       </motion.div>
-      
+
       {/* Transactions List */}
       <motion.div
         className="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700"
@@ -331,12 +330,14 @@ const TransactionsPage: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                  {tableHeaders.map(({ label, align }) => (
+                    <th
+                      key={label}
+                      className={`px-6 py-3 text-${align} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}
+                    >
+                      {label}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -347,22 +348,20 @@ const TransactionsPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          transaction.type === 'income'
-                            ? 'bg-success-100 text-success-800 dark:bg-success-800 dark:text-success-100'
-                            : 'bg-danger-100 text-danger-800 dark:bg-danger-800 dark:text-danger-100'
-                        }`}
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${transaction.type === 'income'
+                          ? 'bg-success-100 text-success-800 dark:bg-success-800 dark:text-success-100'
+                          : 'bg-danger-100 text-danger-800 dark:bg-danger-800 dark:text-danger-100'
+                          }`}
                       >
                         {transaction.type === 'income' ? 'Income' : 'Expense'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">{transaction.category}</td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-200">{transaction.description}</td>
-                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-right ${
-                      transaction.type === 'income' 
-                        ? 'text-success-600 dark:text-success-400' 
-                        : 'text-danger-600 dark:text-danger-400'
-                    }`}>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-right ${transaction.type === 'income'
+                      ? 'text-success-600 dark:text-success-400'
+                      : 'text-danger-600 dark:text-danger-400'
+                      }`}>
                       {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -388,7 +387,7 @@ const TransactionsPage: React.FC = () => {
           </div>
         )}
       </motion.div>
-      
+
       {/* Form Modal */}
       {showForm && currentTransaction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -396,13 +395,13 @@ const TransactionsPage: React.FC = () => {
             <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
               {formMode === 'add' ? 'Add New Transaction' : 'Edit Transaction'}
             </h2>
-            
+
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
                 <select
                   value={currentTransaction.type}
-                  onChange={(e) => setCurrentTransaction({...currentTransaction, type: e.target.value as 'income' | 'expense'})}
+                  onChange={(e) => setCurrentTransaction({ ...currentTransaction, type: e.target.value as 'income' | 'expense' })}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                   required
                 >
@@ -410,25 +409,25 @@ const TransactionsPage: React.FC = () => {
                   <option value="expense">Expense</option>
                 </select>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
                 <input
                   type="text"
                   value={currentTransaction.category}
-                  onChange={(e) => setCurrentTransaction({...currentTransaction, category: e.target.value})}
+                  onChange={(e) => setCurrentTransaction({ ...currentTransaction, category: e.target.value })}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                   placeholder="E.g., Groceries, Salary, Bills, etc."
                   required
                 />
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount</label>
                 <input
                   type="number"
                   value={currentTransaction.amount}
-                  onChange={(e) => setCurrentTransaction({...currentTransaction, amount: parseFloat(e.target.value)})}
+                  onChange={(e) => setCurrentTransaction({ ...currentTransaction, amount: parseFloat(e.target.value) })}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                   placeholder="0.00"
                   min="0"
@@ -436,30 +435,30 @@ const TransactionsPage: React.FC = () => {
                   required
                 />
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
                 <input
                   type="date"
                   value={typeof currentTransaction.date === 'string' ? currentTransaction.date.slice(0, 10) : ''}
-                  onChange={(e) => setCurrentTransaction({...currentTransaction, date: e.target.value})}
+                  onChange={(e) => setCurrentTransaction({ ...currentTransaction, date: e.target.value })}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                   required
                 />
               </div>
-              
+
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                 <textarea
                   value={currentTransaction.description}
-                  onChange={(e) => setCurrentTransaction({...currentTransaction, description: e.target.value})}
+                  onChange={(e) => setCurrentTransaction({ ...currentTransaction, description: e.target.value })}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                   placeholder="Transaction description"
                   rows={3}
                   required
                 />
               </div>
-              
+
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
