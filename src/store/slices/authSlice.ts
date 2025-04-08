@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../store/store';
 import { apiBaseUrl } from '../../config';
 import { User, AuthState, LoginCredentials, RegisterData } from '../../utils/users';
+import { loginUser as apiLoginUser, registerUser as apiRegisterUser } from '../../api/axios/api';
 
 const getStoredUser = (): User | null => {
   try {
@@ -28,23 +29,8 @@ export const login = createAsyncThunk(
     try {
       console.log('Attempting login with:', credentials.email);
       
-      const response = await fetch(`${apiBaseUrl}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      console.log('Login response status:', response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Login error data:', errorData);
-        throw new Error(errorData.error || 'Login failed');
-      }
-
-      const data = await response.json();
+      // Use the API client function instead of direct fetch
+      const data = await apiLoginUser(credentials.email, credentials.password);
       console.log('Login success:', data);
       
       localStorage.setItem('token', data.token);
@@ -60,19 +46,13 @@ export const register = createAsyncThunk(
   'auth/register',
   async (userData: RegisterData, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${apiBaseUrl}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Registration failed');
-      }
-
-      const data = await response.json();
+      // Use the API client function instead of direct fetch
+      const data = await apiRegisterUser(
+        userData.email, 
+        userData.password, 
+        `${userData.firstName} ${userData.lastName}`.trim()
+      );
+      
       localStorage.setItem('token', data.token);
       return data;
     } catch (error) {
@@ -87,16 +67,14 @@ export const fetchUserProfile = createAsyncThunk(
     try {
       const state = getState() as RootState;
       const token = state.auth.token;
+      const userId = state.auth.user?.id;
 
-      if (!token) {
-        throw new Error('No token available');
+      if (!token || !userId) {
+        throw new Error('No token or user ID available');
       }
 
-      const response = await fetch(`${apiBaseUrl}/auth/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // For json-server, directly query the user by ID
+      const response = await fetch(`${apiBaseUrl}/users/${userId}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch user profile');

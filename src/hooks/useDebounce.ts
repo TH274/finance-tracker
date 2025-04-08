@@ -12,12 +12,10 @@ const useDebounce = <T>(value: T, delay: number = 500): T => {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   useEffect(() => {
-    // Set debouncedValue to value after the specified delay
     const timer = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
 
-    // If the value changes, clear the timeout and set a new one
     return () => {
       clearTimeout(timer);
     };

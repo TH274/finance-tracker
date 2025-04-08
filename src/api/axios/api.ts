@@ -1,7 +1,10 @@
 import axios from 'axios';
+import { apiBaseUrl } from '../../config';
 
-const BASE_URL = 'http://localhost:3001';
-const API_URL = `${BASE_URL}`;
+// Determine if we're using json-server based on the API URL
+const isJsonServer = apiBaseUrl.includes('localhost:3001');
+
+const API_URL = apiBaseUrl;
 
 // Create an axios instance
 export const api = axios.create({
@@ -18,13 +21,62 @@ export const isOnline = (): boolean => {
 
 // Auth API
 export const loginUser = async (email: string, password: string) => {
-  const response = await api.post('/users', { email, password });
-  return response.data;
+  try {
+    if (isJsonServer) {
+      const response = await api.get('/users', { params: { email, password } });
+      if (response.data && response.data.length > 0) {
+        return { user: response.data[0], token: 'fake-jwt-token' };
+      }
+      throw new Error('Invalid credentials');
+    } else {
+      // MirageJS implementation
+      const response = await api.post('/auth/login', { email, password });
+      return response.data;
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
+  }
 };
 
 export const registerUser = async (email: string, password: string, name: string) => {
-  const response = await api.post('/users', { email, password, name });
-  return response.data;
+  try {
+    if (isJsonServer) {
+      const existingUsers = await api.get('/users', { params: { email } });
+      if (existingUsers.data && existingUsers.data.length > 0) {
+        throw new Error('User already exists');
+      }
+      
+      const nameParts = name.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      const response = await api.post('/users', { 
+        email, 
+        password, 
+        name,
+        firstName,
+        lastName,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      
+      return { user: response.data, token: 'fake-jwt-token' };
+    } else {
+      // MirageJS implementation
+      const response = await api.post('/auth/register', { 
+        email, 
+        password, 
+        name,
+        firstName: name.split(' ')[0] || '',
+        lastName: name.split(' ').slice(1).join(' ') || ''
+      });
+      return response.data;
+    }
+  } catch (error) {
+    console.error('Registration error:', error);
+    throw error;
+  }
 };
 
 // Transactions API

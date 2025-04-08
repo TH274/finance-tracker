@@ -7,7 +7,6 @@ interface ThemeState {
   mode: ThemeMode;
 }
 
-// Get user preferred theme from localStorage or system preference
 const getUserPreferredTheme = (): ThemeMode => {
   const savedTheme = localStorage.getItem('theme') as ThemeMode;
   
@@ -15,7 +14,6 @@ const getUserPreferredTheme = (): ThemeMode => {
     return savedTheme;
   }
   
-  // If no saved preference, use system preference
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 };
 

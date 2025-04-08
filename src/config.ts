@@ -1,5 +1,10 @@
+// Determine if we're using json-server or MirageJS
+const USE_JSON_SERVER = import.meta.env.VITE_USE_JSON_SERVER === 'true';
+
 // API base URL for all API requests
-export const apiBaseUrl = import.meta.env.DEV ? '/api' : 'http://localhost:3001/api';
+export const apiBaseUrl = import.meta.env.DEV 
+  ? (USE_JSON_SERVER ? 'http://localhost:3001' : '/api')
+  : 'http://localhost:3001';
 
 export const defaultCurrency = 'USD';
 

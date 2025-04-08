@@ -62,6 +62,63 @@ const routes = (server: Server) => {
     };
   });
 
+  // Add support for json-server style queries
+  server.get('/users', (schema, request) => {
+    const { email, password } = request.queryParams;
+    
+    // If both email and password provided, it's a login attempt
+    if (email && password) {
+      const user = schema.db.users.findBy({ email, password });
+      
+      if (user) {
+        return [user];
+      }
+      return [];
+    }
+    
+    // If only email provided, it's a user existence check
+    if (email) {
+      const user = schema.db.users.findBy({ email });
+      if (user) {
+        return [user];
+      }
+      return [];
+    }
+    
+    // Return all users if no filters
+    return schema.db.users;
+  });
+
+  // Get user by ID
+  server.get('/users/:id', (schema, request) => {
+    const id = request.params.id;
+    return schema.db.users.find(id);
+  });
+
+  // Create a new user (json-server style)
+  server.post('/users', (schema, request) => {
+    const attrs = JSON.parse(request.requestBody);
+    
+    // Check if user exists
+    const existingUser = schema.db.users.findBy({ email: attrs.email });
+    if (existingUser) {
+      return new Response(400, {}, { error: 'User already exists' });
+    }
+    
+    // Generate a new ID
+    const newId = (schema.db.users.length + 1).toString();
+    
+    // Create new user
+    const newUser = schema.create('user', {
+      ...attrs,
+      id: newId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    
+    return newUser.attrs;
+  });
+
   // Transactions
   server.get('/transactions', (schema, request) => {
     const { userId, type, startDate, endDate, search } = request.queryParams;

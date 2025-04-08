@@ -1,7 +1,7 @@
 {
   "users": [
     {
-      "id": 1,
+      "id": "1",
       "email": "user@example.com",
       "password": "password123",
       "name": "John Doe",
@@ -11,7 +11,7 @@
       "updatedAt": "2025-04-01T00:00:00.000Z"
     },
     {
-      "id": 2,
+      "id": "2",
       "email": "test@example.com",
       "password": "test123",
       "name": "Test User",
@@ -19,11 +19,21 @@
       "lastName": "User",
       "createdAt": "2025-04-02T00:00:00.000Z",
       "updatedAt": "2025-04-02T00:00:00.000Z"
+    },
+    {
+      "id": "c22c",
+      "email": "nekoneko@gmail.com",
+      "password": "12345678",
+      "firstName": "tran",
+      "lastName": "hoan",
+      "name": "tran hoan",
+      "createdAt": "2025-04-08T02:50:17.604Z",
+      "updatedAt": "2025-04-08T02:50:17.604Z"
     }
   ],
   "transactions": [
     {
-      "id": 1,
+      "id": "1",
       "userId": 1,
       "type": "income",
       "category": "Salary",
@@ -32,7 +42,7 @@
       "description": "Monthly salary"
     },
     {
-      "id": 2,
+      "id": "2",
       "userId": 1,
       "type": "expense",
       "category": "Groceries",
@@ -41,7 +51,7 @@
       "description": "Weekly groceries"
     },
     {
-      "id": 3,
+      "id": "3",
       "userId": 1,
       "type": "expense",
       "category": "Utilities",
@@ -50,7 +60,7 @@
       "description": "Electricity bill"
     },
     {
-      "id": 4,
+      "id": "4",
       "userId": 1,
       "type": "income",
       "category": "Freelance",
@@ -59,43 +69,74 @@
       "description": "Freelance project"
     },
     {
-      "id": 5,
+      "id": "5",
       "userId": 1,
       "type": "expense",
       "category": "Dining",
       "amount": 75,
       "date": "2025-04-07",
       "description": "Dinner with friends"
+    },
+    {
+      "id": "9a5e",
+      "type": "income",
+      "category": "Groceries",
+      "amount": 1200,
+      "date": "2025-04-08",
+      "description": "asdasd",
+      "userId": "c22c",
+      "createdAt": "2025-04-08T03:02:23.328Z",
+      "updatedAt": "2025-04-08T03:03:26.982Z"
+    },
+    {
+      "id": "4664",
+      "type": "expense",
+      "category": "Salary",
+      "amount": 120,
+      "date": "2025-04-08",
+      "description": "sadasdasdasd",
+      "userId": "c22c",
+      "createdAt": "2025-04-08T03:03:14.166Z",
+      "updatedAt": "2025-04-08T03:03:14.166Z"
     }
   ],
   "budgets": [
     {
-      "id": 1,
+      "id": "1",
       "userId": 1,
       "category": "Groceries",
       "limit": 500,
       "period": "monthly"
     },
     {
-      "id": 2,
+      "id": "2",
       "userId": 1,
       "category": "Dining",
       "limit": 300,
       "period": "monthly"
     },
     {
-      "id": 3,
+      "id": "3",
       "userId": 1,
       "category": "Entertainment",
       "limit": 200,
       "period": "monthly"
     },
     {
-      "id": 4,
+      "id": "4",
       "userId": 1,
       "category": "Utilities",
       "limit": 250,
       "period": "monthly"
+    },
+    {
+      "id": "5b83",
+      "category": "Food & Dining",
+      "limit": 5000,
+      "period": "monthly",
+      "userId": "c22c",
+      "createdAt": "2025-04-08T03:02:55.540Z",
+      "updatedAt": "2025-04-08T03:02:55.540Z"
     }
   ]
-} 
+}
