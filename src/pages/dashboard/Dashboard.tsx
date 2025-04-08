@@ -25,22 +25,39 @@ const Dashboard: React.FC = () => {
 
   // Authentication check
   useEffect(() => {
-    if (!isAuthenticated) {
+    let isMounted = true;
+    
+    if (!isAuthenticated && isMounted) {
       console.log('Not authenticated, redirecting to login');
       navigate('/login');
     }
+    
+    return () => {
+      isMounted = false;
+    };
   }, [isAuthenticated, navigate]);
 
   // Fetch user profile if authenticated but no user data
   useEffect(() => {
-    if (isAuthenticated && !user) {
-      console.log('Authenticated but no user data, fetching profile');
-      dispatch(fetchUserProfile() as any);
-    }
+    let isMounted = true;
+    
+    const fetchProfile = async () => {
+      if (isAuthenticated && !user && isMounted) {
+        console.log('Authenticated but no user data, fetching profile');
+        await dispatch(fetchUserProfile() as any);
+      }
+    };
+    
+    fetchProfile();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [isAuthenticated, user, dispatch]);
 
   // Fetch data on component mount
   useEffect(() => {
+    let isMounted = true;
     const fetchData = async () => {
       setIsLoading(true);
       try {
@@ -51,22 +68,31 @@ const Dashboard: React.FC = () => {
             dispatch(fetchTransactions(user.id) as any),
             dispatch(fetchBudgets(user.id) as any)
           ]);
-          console.log('Dashboard - Fetching completed');
+          if (isMounted) {
+            console.log('Dashboard - Fetching completed');
+          }
         } else if (isAuthenticated) {
           console.log('User is authenticated but ID not available, waiting for profile');
         } else {
           console.error('Not authenticated, cannot fetch data');
-          navigate('/login');
+          if (isMounted) {
+            navigate('/login');
+          }
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
-        if (user?.id || !isAuthenticated) {
+        if (isMounted && (user?.id || !isAuthenticated)) {
           setIsLoading(false);
         }
       }
     };
     fetchData();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
   }, [dispatch, user?.id, isAuthenticated, navigate]);
 
   // Log data on mount and when data changes significantly

@@ -13,13 +13,6 @@ export interface LoginCredentials {
   googleCredential?: string;
 }
 
-export interface RegisterData {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-}
-
 export interface AuthState {
   user: User | null;
   token: string | null;

@@ -3,15 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { register } from '../../store/slices/authSlice';
 import { motion } from 'framer-motion';
-
-// Registration data type
-interface RegisterData {
-  email: string;
-  password: string;
-  confirmPassword: string;
-  firstName: string;
-  lastName: string;
-}
+import { RegisterData } from '../../utils/form';
 
 const Register: React.FC = () => {
   const dispatch = useDispatch();

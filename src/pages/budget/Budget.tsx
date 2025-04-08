@@ -12,23 +12,8 @@ import {
 import { fetchTransactions } from '../../store/slices/transactionsSlice';
 import useBudgetWarning, { BudgetWarning } from '../../hooks/useBudgetWarning';
 import { Budget } from '../../utils/budget';
+import { commonCategories } from '../../contains/categories';
 
-// Common categories for budgets
-const commonCategories = [
-  'Food & Dining',
-  'Transportation',
-  'Entertainment',
-  'Housing',
-  'Utilities',
-  'Health & Medical',
-  'Shopping',
-  'Personal Care',
-  'Travel',
-  'Education',
-  'Gifts & Donations',
-  'Investments',
-  'Miscellaneous'
-];
 
 const BudgetPage: React.FC = () => {
   const dispatch = useDispatch();

@@ -14,3 +14,12 @@ export interface LoginFormData {
     email: string;
     password: string;
   }
+
+// Registration data type
+export interface RegisterData {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+}

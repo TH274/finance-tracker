@@ -1,14 +1,9 @@
-// Determine if we're using json-server or MirageJS
 const USE_JSON_SERVER = import.meta.env.VITE_USE_JSON_SERVER === 'true';
 
-// API base URL for all API requests
 export const apiBaseUrl = import.meta.env.DEV 
   ? (USE_JSON_SERVER ? 'http://localhost:3001' : '/api')
   : 'http://localhost:3001';
 
-export const defaultCurrency = 'USD';
-
-export const appTitle = 'Personal Finance Tracker';
 
 export const themeOptions = {
   light: {
@@ -25,5 +20,4 @@ export const themeOptions = {
   }
 };
 
-// Default pagination limit
 export const defaultPageLimit = 10; 
