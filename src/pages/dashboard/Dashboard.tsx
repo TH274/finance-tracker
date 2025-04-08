@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense, useMemo } from 'react';
+import React, { useState, useEffect, lazy, Suspense, useMemo, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
 import { RootState } from '../../store/store';
@@ -21,6 +21,7 @@ const Dashboard: React.FC = () => {
   const { transactions } = useSelector((state: RootState) => state.transactions);
   const { budgets } = useSelector((state: RootState) => state.budgets);
   const [isLoading, setIsLoading] = useState(true);
+  const dataLogged = useRef(false);
 
   // Authentication check
   useEffect(() => {
@@ -66,12 +67,18 @@ const Dashboard: React.FC = () => {
       }
     };
     fetchData();
-  }, [dispatch, user, isAuthenticated, navigate]);
+  }, [dispatch, user?.id, isAuthenticated, navigate]);
 
+  // Log data on mount and when data changes significantly
   useEffect(() => {
-    console.log('Dashboard - Transactions:', transactions);
-    console.log('Dashboard - Budgets:', budgets);
-  }, [transactions, budgets]);
+    // Only log if we haven't logged before or if the data has actually changed in a meaningful way
+    if (!dataLogged.current || 
+        (transactions.length > 0 && budgets.length > 0)) {
+      console.log('Dashboard - Transactions:', transactions);
+      console.log('Dashboard - Budgets:', budgets);
+      dataLogged.current = true;
+    }
+  }, [transactions.length, budgets.length]);
 
   const budgetWarnings = useBudgetWarning(transactions, budgets);
 

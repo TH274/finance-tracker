@@ -35,21 +35,15 @@ const routes = (server: Server) => {
       return new Response(400, {}, { error: 'Invalid Google credential' });
     }
     
-    // In a real application, you would verify the Google token
-    // and extract user information from it
-    // For demo purposes, we'll create a mock user
-    
-    // Generate a unique ID for the Google user
     const googleUserId = `google-${Date.now()}`;
     
-    // Check if a user with this Google ID already exists
     let user = schema.db.users.findBy({ googleId: googleUserId });
     
     if (!user) {
       // Create a new user entry for this Google user
       user = schema.create('user', {
         id: googleUserId,
-        email: 'google-user@example.com', // In a real app, extract from token
+        email: 'google-user@example.com',
         firstName: 'Google',
         lastName: 'User',
         googleId: googleUserId,
