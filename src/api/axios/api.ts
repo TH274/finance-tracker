@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { apiBaseUrl } from '../../config';
 
-// Determine if we're using json-server based on the API URL
 const isJsonServer = apiBaseUrl.includes('localhost:3001');
 
 const API_URL = apiBaseUrl;
@@ -35,6 +34,32 @@ export const loginUser = async (email: string, password: string) => {
     }
   } catch (error) {
     console.error('Login error:', error);
+    throw error;
+  }
+};
+
+export const loginWithGoogle = async (credential: string) => {
+  try {
+    if (isJsonServer) {
+      // For JSON server, we would need to create a mock response
+      // In a real app, this would verify the Google token with your backend
+      const mockUser = {
+        id: `google-${Date.now()}`,
+        email: 'google-user@example.com', // In a real app, you would get this from decoded token
+        firstName: 'Google',
+        lastName: 'User',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      return { user: mockUser, token: 'fake-google-jwt-token' };
+    } else {
+      // MirageJS implementation
+      const response = await api.post('/auth/google', { credential });
+      return response.data;
+    }
+  } catch (error) {
+    console.error('Google login error:', error);
     throw error;
   }
 };

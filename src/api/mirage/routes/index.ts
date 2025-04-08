@@ -27,6 +27,53 @@ const routes = (server: Server) => {
     return new Response(401, {}, { error: 'Invalid credentials' });
   });
 
+  // Google Authentication
+  server.post('/auth/google', (schema, request) => {
+    const { credential } = JSON.parse(request.requestBody);
+    
+    if (!credential) {
+      return new Response(400, {}, { error: 'Invalid Google credential' });
+    }
+    
+    // In a real application, you would verify the Google token
+    // and extract user information from it
+    // For demo purposes, we'll create a mock user
+    
+    // Generate a unique ID for the Google user
+    const googleUserId = `google-${Date.now()}`;
+    
+    // Check if a user with this Google ID already exists
+    let user = schema.db.users.findBy({ googleId: googleUserId });
+    
+    if (!user) {
+      // Create a new user entry for this Google user
+      user = schema.create('user', {
+        id: googleUserId,
+        email: 'google-user@example.com', // In a real app, extract from token
+        firstName: 'Google',
+        lastName: 'User',
+        googleId: googleUserId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }).attrs;
+    }
+    
+    // Format user data to match the expected structure
+    const userData = {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName || 'Google',
+      lastName: user.lastName || 'User',
+      createdAt: user.createdAt || new Date().toISOString(),
+      updatedAt: user.updatedAt || new Date().toISOString()
+    };
+    
+    return {
+      user: userData,
+      token: 'fake-google-jwt-token'
+    };
+  });
+
   server.post('/auth/register', (schema, request) => {
     const attrs = JSON.parse(request.requestBody);
     const existingUser = schema.db.users.findBy({ email: attrs.email });

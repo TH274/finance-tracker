@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { login } from '../../store/slices/authSlice';
 import { motion } from 'framer-motion';
 import { LoginFormData } from '../../utils/form';
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login: React.FC = () => {
   const dispatch = useDispatch();
@@ -59,6 +60,40 @@ const Login: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      console.log('Google login success:', credentialResponse);
+      setError('');
+      setIsLoading(true);
+      
+      // Create a custom login action for Google auth
+      const result = await dispatch(login({
+        googleCredential: credentialResponse.credential,
+      }) as any);
+      
+      console.log('Google login result:', result);
+      
+      if (result.error) {
+        throw new Error(result.error.message || 'Google login failed');
+      }
+      
+      navigate('/');
+    } catch (error) {
+      console.error('Google login error:', error);
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Google login failed. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google login failed. Please try again.');
   };
   
   return (
@@ -122,6 +157,24 @@ const Login: React.FC = () => {
           )}
         </button>
       </form>
+      
+      <div className="mt-4 flex items-center justify-center">
+        <div className="border-t border-gray-300 dark:border-gray-600 flex-grow mr-3"></div>
+        <span className="text-sm text-gray-500 dark:text-gray-400">Or</span>
+        <div className="border-t border-gray-300 dark:border-gray-600 flex-grow ml-3"></div>
+      </div>
+      
+      <div className="mt-4 flex justify-center">
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleError}
+          useOneTap
+          theme="filled_blue"
+          shape="pill"
+          text="signin_with"
+          locale="en"
+        />
+      </div>
       
       <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
         Don't have an account?{' '}

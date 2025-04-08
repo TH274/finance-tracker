@@ -8,8 +8,9 @@ export interface User {
 }
 
 export interface LoginCredentials {
-  email: string;
-  password: string;
+  email?: string;
+  password?: string;
+  googleCredential?: string;
 }
 
 export interface RegisterData {

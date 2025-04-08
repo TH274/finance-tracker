@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../store/store';
 import { apiBaseUrl } from '../../config';
 import { User, AuthState, LoginCredentials, RegisterData } from '../../utils/users';
-import { loginUser as apiLoginUser, registerUser as apiRegisterUser } from '../../api/axios/api';
+import { loginUser as apiLoginUser, registerUser as apiRegisterUser, loginWithGoogle as apiLoginWithGoogle } from '../../api/axios/api';
 
 const getStoredUser = (): User | null => {
   try {
@@ -27,10 +27,19 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
-      console.log('Attempting login with:', credentials.email);
+      let data;
       
-      // Use the API client function instead of direct fetch
-      const data = await apiLoginUser(credentials.email, credentials.password);
+      // Check if this is a Google login or regular email/password login
+      if (credentials.googleCredential) {
+        console.log('Attempting login with Google credential');
+        data = await apiLoginWithGoogle(credentials.googleCredential);
+      } else if (credentials.email && credentials.password) {
+        console.log('Attempting login with:', credentials.email);
+        data = await apiLoginUser(credentials.email, credentials.password);
+      } else {
+        throw new Error('Invalid credentials provided');
+      }
+      
       console.log('Login success:', data);
       
       localStorage.setItem('token', data.token);
